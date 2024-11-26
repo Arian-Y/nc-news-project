@@ -5,6 +5,7 @@ const request = require("supertest");
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js");
 const topics = require("../db/data/test-data/topics.js");
+require("jest-sorted");
 
 /* Set up your test imports here */
 
@@ -69,6 +70,38 @@ describe("GET /api/articles/:article_id", () => {
           created_at: expect.any(String),
           votes: expect.any(Number),
           article_img_url: expect.any(String),
+        });
+      });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: with an array of aricleswith the correct properties", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        articles.forEach((article) => {
+          expect(article).toMatchObject({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("200: Responds with an array of article objects sorted by created_at in descending order ", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body.articles);
+        expect(body.articles).toBeSorted("created_at", {
+          decending: true,
         });
       });
   });
