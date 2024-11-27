@@ -3,6 +3,7 @@ const {
   fetchTopics,
   fetchArticlesById,
   fetchArticles,
+  fetchComments,
 } = require("../models/models");
 
 function getApi(req, res) {
@@ -33,4 +34,23 @@ function getArticles(req, res, next) {
     })
     .catch(next);
 }
-module.exports = { getApi, getTopics, getArticlesById, getArticles };
+
+function getComments(req, res, next) {
+  const { article_id } = req.params;
+  fetchComments(article_id)
+    .then((comments) => {
+      console.log(comments, "<-- comments");
+      res.status(200).send({ comments });
+    })
+    .catch((err) => {
+      console.log("catch");
+      next(err);
+    });
+}
+module.exports = {
+  getApi,
+  getTopics,
+  getArticlesById,
+  getArticles,
+  getComments,
+};

@@ -33,4 +33,26 @@ ORDER BY articles.created_at DESC;`;
   });
 }
 
-module.exports = { fetchTopics, fetchArticlesById, fetchArticles };
+function fetchComments(article_id) {
+  return db
+    .query(
+      `SELECT * FROM comments WHERE article_id = $1
+      ORDER BY created_at DESC;`,
+      [article_id]
+    )
+    .then((body) => {
+      if (body.rows.length === 0) {
+        console.log(body.rows, "<-- rows in reject model");
+        return Promise.reject({ status: 404, msg: "Not found" });
+      } else {
+        return body.rows;
+      }
+    });
+}
+
+module.exports = {
+  fetchTopics,
+  fetchArticlesById,
+  fetchArticles,
+  fetchComments,
+};
