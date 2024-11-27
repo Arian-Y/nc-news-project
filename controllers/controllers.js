@@ -4,6 +4,8 @@ const {
   fetchArticlesById,
   fetchArticles,
   fetchComments,
+  printComments,
+  getUsers,
 } = require("../models/models");
 
 function getApi(req, res) {
@@ -39,13 +41,26 @@ function getComments(req, res, next) {
   const { article_id } = req.params;
   fetchComments(article_id)
     .then((comments) => {
-      console.log(comments, "<-- comments");
       res.status(200).send({ comments });
     })
     .catch((err) => {
-      console.log("catch");
       next(err);
     });
+}
+
+function postComments(req, res, next) {
+  const { article_id } = req.params;
+  const { userName, body } = req.body;
+  const commentPromise = [
+    getUsers(userName),
+    fetchArticlesById(article_id),
+    printComments(body, userName, article_id),
+  ];
+  Promise.all(commentPromise)
+    .then((promiseResult) => {
+      res.status(201).send({ comment: promiseResult[2] });
+    })
+    .catch(next);
 }
 module.exports = {
   getApi,
@@ -53,4 +68,5 @@ module.exports = {
   getArticlesById,
   getArticles,
   getComments,
+  postComments,
 };

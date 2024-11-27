@@ -1,3 +1,4 @@
+const { promises } = require("supertest/lib/test");
 const db = require("../db/connection");
 
 function fetchTopics() {
@@ -10,7 +11,11 @@ function fetchArticlesById(articleId) {
   return db
     .query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
     .then(({ rows }) => {
-      return rows[0];
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "not found" });
+      } else {
+        return rows[0];
+      }
     });
 }
 
@@ -42,7 +47,6 @@ function fetchComments(article_id) {
     )
     .then((body) => {
       if (body.rows.length === 0) {
-        console.log(body.rows, "<-- rows in reject model");
         return Promise.reject({ status: 404, msg: "Not found" });
       } else {
         return body.rows;
@@ -50,9 +54,37 @@ function fetchComments(article_id) {
     });
 }
 
+function printComments(body, userName, article_id) {
+  return db
+    .query(
+      `INSERT INTO comments(
+      body,
+      author, article_id) VALUES(
+        $1,$2,$3)
+        RETURNING * `,
+      [body, userName, article_id]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+}
+
+function getUsers(userName) {
+  return db
+    .query(`Select * FROM users WHERE username = $1;`, [userName])
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "not found" });
+      } else {
+        return rows;
+      }
+    });
+}
 module.exports = {
   fetchTopics,
   fetchArticlesById,
   fetchArticles,
   fetchComments,
+  printComments,
+  getUsers,
 };

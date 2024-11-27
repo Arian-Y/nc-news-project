@@ -83,6 +83,7 @@ describe("GET /api/articles", () => {
       .then(({ body: { articles } }) => {
         articles.forEach((article) => {
           expect(article).toMatchObject({
+            article_id: expect.any(Number),
             title: expect.any(String),
             topic: expect.any(String),
             author: expect.any(String),
@@ -112,6 +113,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/5/comments")
       .expect(200)
       .then(({ body }) => {
+        expect(body.comments).toHaveLength(2);
         body.comments.forEach((comment) => {
           expect(comment).toMatchObject({
             comment_id: expect.any(Number),
@@ -149,6 +151,70 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe.only("POST /api/articles/:article_id/comments", () => {
+  test("200: recieves an object with a username and body", () => {
+    const messageToSend = {
+      userName: "icellusedkars",
+      body: "jonny's body",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(messageToSend)
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: 0,
+          created_at: expect.any(String),
+          author: messageToSend.userName,
+          body: messageToSend.body,
+          article_id: 1,
+        });
+      });
+  });
+
+  test("404: return not found when send a user that does not exist", () => {
+    const messageToSend = {
+      userName: "wizard",
+      body: "im a wizard",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(messageToSend)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+
+  test("400: returns not found when you pass no userName", () => {
+    const messageToSend = {
+      userName: "icellusedkars",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(messageToSend)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("400: returns not found when you pass no userName", () => {
+    const messageToSend = {
+      userName: "icellusedkars",
+      body: "jonny's body",
+    };
+    return request(app)
+      .post("/api/articles/100/comments")
+      .send(messageToSend)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
       });
   });
 });
