@@ -219,7 +219,7 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 
-describe.only("PATCH /api/articles/:article_id", () => {
+describe("PATCH /api/articles/:article_id", () => {
   test("200: returns an updated comments object with the corect number of votes", () => {
     const infoForUpdate = {
       inc_votes: 5,
