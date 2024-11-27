@@ -6,7 +6,10 @@ const {
   getArticlesById,
   getArticles,
   getComments,
+  postComments,
 } = require("./controllers/controllers");
+
+app.use(express.json());
 
 app.get("/api", getApi);
 
@@ -18,23 +21,26 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getComments);
 
+app.post("/api/articles/:article_id/comments", postComments);
+
 app.all("*", (re, res, next) => {
   res.status(404).send({ msg: "not found" });
   next();
 });
 
 app.use((err, req, res, next) => {
-  if (err.code === "22P02") {
+  console.log(err, "in the handler");
+  if (err.code === "22P02" || err.code === "23502") {
     res.status(400).send({ msg: "Bad request" });
   }
   next(err);
 });
 
 app.use((err, req, res, next) => {
-  console.log("custom err");
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
   } else next(err);
+  s;
 });
 
 app.use((req, res) => {
