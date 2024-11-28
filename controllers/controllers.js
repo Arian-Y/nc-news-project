@@ -8,6 +8,7 @@ const {
   getUsers,
   updateArticles,
   removeCommentById,
+  fetchUsers,
 } = require("../models/models");
 
 function getApi(req, res) {
@@ -32,7 +33,9 @@ function getArticlesById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  fetchArticles()
+  const { sortBy } = req.query;
+  const { order } = req.query;
+  fetchArticles(sortBy, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
@@ -80,15 +83,18 @@ function patchArticlesById(req, res, next) {
 }
 
 function deleteCommentById(req, res, next) {
-  // console.log("im in the contoller");
   const { comment_id } = req.params;
-  // console.log(comment_id);
   removeCommentById(comment_id)
     .then((comment) => {
-      // console.log(comment, "im the comment");
       res.status(204).send(comment);
     })
     .catch(next);
+}
+
+function getAllUsers(req, res) {
+  fetchUsers().then((users) => {
+    res.status(200).send(users);
+  });
 }
 module.exports = {
   getApi,
@@ -99,4 +105,5 @@ module.exports = {
   postComments,
   patchArticlesById,
   deleteCommentById,
+  getAllUsers,
 };

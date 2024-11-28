@@ -19,7 +19,7 @@ function fetchArticlesById(articleId) {
     });
 }
 
-function fetchArticles() {
+function fetchArticles(sortBy = "created_at", order = "DESC") {
   const queryText = `SELECT
   articles.article_id,
   articles.title,
@@ -32,7 +32,7 @@ function fetchArticles() {
 FROM articles
 LEFT JOIN comments ON comments.article_id = articles.article_id
 GROUP BY articles.article_id
-ORDER BY articles.created_at DESC;`;
+ORDER BY ${sortBy} ${order};`;
   return db.query(queryText).then(({ rows }) => {
     return rows;
   });
@@ -110,6 +110,12 @@ function removeCommentById(comment_id) {
     });
 }
 
+function fetchUsers() {
+  return db.query(`SELECT * FROM users`).then(({ rows }) => {
+    return rows;
+  });
+}
+
 module.exports = {
   fetchTopics,
   fetchArticlesById,
@@ -119,4 +125,5 @@ module.exports = {
   getUsers,
   updateArticles,
   removeCommentById,
+  fetchUsers,
 };

@@ -105,6 +105,33 @@ describe("GET /api/articles", () => {
         });
       });
   });
+
+  test("200: return the object ordered by created_at when passed no parameter", () => {
+    return request(app)
+      .get("/api/articles?")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSorted("created_at");
+      });
+  });
+
+  test("200: return the object ordered by votes when passed votes as a parameter", () => {
+    return request(app)
+      .get("/api/articles?sortBy=votes")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSorted("votes");
+      });
+  });
+
+  test("200: return the object sorted by descending order when passed descending order", () => {
+    return request(app)
+      .get("/api/articles?sortBy=votes")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -229,7 +256,6 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(infoForUpdate)
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(body).toMatchObject({
           article_id: 2,
           title: expect.any(String),
@@ -310,4 +336,23 @@ describe("DELETE /api/comments/:comment_id", () => {
       });
   });
 });
-//here so that i can push off to 10-origin
+
+
+describe("GET /api/users", () => {
+  test("200: responds with all users", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        body.forEach((user) => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
+      });
+  });
+});
+
+
