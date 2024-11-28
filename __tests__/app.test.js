@@ -281,13 +281,31 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe.skip("DELETE /api/comments/:comment_id", () => {
-  test("204: returs an empty body when passed the comment_id", () => {
+describe.only("DELETE /api/comments/:comment_id", () => {
+  test("204: returns an empty body when passed the comment_id", () => {
     return request(app)
       .delete("/api/comments/1")
       .expect(204)
       .then(({ body }) => {
         expect(body).toEqual({});
+      });
+  });
+
+  test("400: returns not found when you passed NAN ", () => {
+    return request(app)
+      .delete("/api/comments/HAHAH")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("404: return not found when passed a non existant article id", () => {
+    return request(app)
+      .delete("/api/comments/600")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
       });
   });
 });

@@ -80,10 +80,12 @@ function patchArticlesById(req, res, next) {
 }
 
 function deleteCommentById(req, res, next) {
+  // console.log("im in the contoller");
   const { comment_id } = req.params;
+  // console.log(comment_id);
   removeCommentById(comment_id)
     .then((comment) => {
-      console.log(comment);
+      // console.log(comment, "im the comment");
       res.status(204).send(comment);
     })
     .catch(next);
