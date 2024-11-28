@@ -91,7 +91,6 @@ function deleteCommentById(req, res, next) {
 
 function getAllUsers(req, res) {
   fetchUsers().then((users) => {
-    console.log(users, "<=== in the controller");
     res.status(200).send(users);
   });
 }
