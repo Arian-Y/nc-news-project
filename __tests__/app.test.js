@@ -132,6 +132,16 @@ describe("GET /api/articles", () => {
         expect(articles).toBeSortedBy("votes", { descending: true });
       });
   });
+
+  test.only("200: return the object sorted by the topic that is inserted", () => {
+    return request(app)
+      .get("/api/articles?")
+
+      .then(({ body: { articles } }) => {
+        console.log(articles, "in the test");
+        //  expect(articles).toBeSortedBy("mitch");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -337,7 +347,6 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
-
 describe("GET /api/users", () => {
   test("200: responds with all users", () => {
     return request(app)
@@ -354,5 +363,3 @@ describe("GET /api/users", () => {
       });
   });
 });
-
-

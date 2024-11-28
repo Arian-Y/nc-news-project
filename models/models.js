@@ -19,7 +19,8 @@ function fetchArticlesById(articleId) {
     });
 }
 
-function fetchArticles(sortBy = "created_at", order = "DESC") {
+function fetchArticles(sortBy = "created_at", order = "DESC", topic = "mitch") {
+  console.log(topic, "in the model");
   const queryText = `SELECT
   articles.article_id,
   articles.title,
@@ -29,11 +30,14 @@ function fetchArticles(sortBy = "created_at", order = "DESC") {
   articles.votes,
   articles.article_img_url,
    CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
-FROM articles
+FROM articles 
 LEFT JOIN comments ON comments.article_id = articles.article_id
+WHERE articles.topic= ${topic}
 GROUP BY articles.article_id
 ORDER BY ${sortBy} ${order};`;
+
   return db.query(queryText).then(({ rows }) => {
+    console.log(rows);
     return rows;
   });
 }
