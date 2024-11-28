@@ -337,6 +337,7 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
+
 describe("GET /api/users", () => {
   test("200: responds with all users", () => {
     return request(app)
@@ -353,3 +354,5 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+
