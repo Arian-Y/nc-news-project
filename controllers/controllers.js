@@ -6,6 +6,7 @@ const {
   fetchComments,
   printComments,
   getUsers,
+  updateArticles,
 } = require("../models/models");
 
 function getApi(req, res) {
@@ -62,6 +63,20 @@ function postComments(req, res, next) {
     })
     .catch(next);
 }
+
+function patchArticlesById(req, res, next) {
+  const { inc_votes } = req.body;
+  const { article_id } = req.params;
+  const articlePromise = [
+    fetchArticlesById(article_id),
+    updateArticles(article_id, inc_votes),
+  ];
+  Promise.all(articlePromise)
+    .then((promiseResult) => {
+      res.status(200).send(promiseResult[1]);
+    })
+    .catch(next);
+}
 module.exports = {
   getApi,
   getTopics,
@@ -69,4 +84,5 @@ module.exports = {
   getArticles,
   getComments,
   postComments,
+  patchArticlesById,
 };

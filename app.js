@@ -7,6 +7,7 @@ const {
   getArticles,
   getComments,
   postComments,
+  patchArticlesById,
 } = require("./controllers/controllers");
 
 app.use(express.json());
@@ -22,6 +23,8 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getComments);
 
 app.post("/api/articles/:article_id/comments", postComments);
+
+app.patch("/api/articles/:article_id", patchArticlesById);
 
 app.all("*", (re, res, next) => {
   res.status(404).send({ msg: "not found" });

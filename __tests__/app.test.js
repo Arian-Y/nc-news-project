@@ -155,7 +155,7 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-describe.only("POST /api/articles/:article_id/comments", () => {
+describe("POST /api/articles/:article_id/comments", () => {
   test("200: recieves an object with a username and body", () => {
     const messageToSend = {
       userName: "icellusedkars",
@@ -204,7 +204,7 @@ describe.only("POST /api/articles/:article_id/comments", () => {
       });
   });
 
-  test("400: returns not found when you pass no userName", () => {
+  test("404: returns not found when passed a non existant user_id", () => {
     const messageToSend = {
       userName: "icellusedkars",
       body: "jonny's body",
@@ -215,6 +215,68 @@ describe.only("POST /api/articles/:article_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("not found");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: returns an updated comments object with the corect number of votes", () => {
+    const infoForUpdate = {
+      inc_votes: 5,
+    };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(infoForUpdate)
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body).toMatchObject({
+          article_id: 2,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: 5,
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+
+  test("404: return not found when passed a non existant article id", () => {
+    const infoForUpdate = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/400")
+      .send(infoForUpdate)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+
+  test("400: returns not found when you pass no vote", () => {
+    const infoForUpdate = {};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(infoForUpdate)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("400: returns not found when you passed NAN ", () => {
+    const infoForUpdate = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/HAHA")
+      .send(infoForUpdate)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });
