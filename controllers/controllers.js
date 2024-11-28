@@ -33,7 +33,9 @@ function getArticlesById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  fetchArticles()
+  const { sortBy } = req.query;
+  const { order } = req.query;
+  fetchArticles(sortBy, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
