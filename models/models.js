@@ -9,7 +9,19 @@ function fetchTopics() {
 
 function fetchArticlesById(articleId) {
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
+    .query(
+      `SELECT articles.article_id,
+       articles.title,
+        articles.author,
+         articles.topic,
+          articles created_at,
+          articles.body,
+           articles.votes,
+            articles.article_img_url,
+             CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id WHERE articles.article_id = $1
+             GROUP BY articles.article_id;`,
+      [articleId]
+    )
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "not found" });
@@ -19,21 +31,34 @@ function fetchArticlesById(articleId) {
     });
 }
 
-function fetchArticles(sortBy = "created_at", order = "DESC") {
-  const queryText = `SELECT
-  articles.article_id,
-  articles.title,
-  articles.author,
-  articles.topic,
-  articles.created_at,
-  articles.votes,
-  articles.article_img_url,
-   CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
-FROM articles
-LEFT JOIN comments ON comments.article_id = articles.article_id
-GROUP BY articles.article_id
-ORDER BY ${sortBy} ${order};`;
-  return db.query(queryText).then(({ rows }) => {
+function fetchArticles(sortBy = "created_at", order = "DESC", topic) {
+  let queriedInfo = [];
+  const acceptableSortBy = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+  ];
+  const acceptableOrder = ["ASC", "DESC"];
+
+  if (!acceptableOrder.includes(order) || !acceptableSortBy.includes(sortBy)) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+
+  let queryText = `SELECT
+  articles.article_id, articles.title, articles.author, articles.topic, articles created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id `;
+
+  if (topic) {
+    queryText += `WHERE topic = $1 `;
+    queriedInfo.push(topic);
+  }
+  if (sortBy) {
+    queryText += `GROUP BY articles.article_id ORDER BY articles.${sortBy} ${order}`;
+  }
+  return db.query(queryText, queriedInfo).then(({ rows }) => {
     return rows;
   });
 }
@@ -116,6 +141,18 @@ function fetchUsers() {
   });
 }
 
+function selectValidTopic(topic) {
+  return db
+    .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "not found" });
+      } else {
+        return rows;
+      }
+    });
+}
+
 module.exports = {
   fetchTopics,
   fetchArticlesById,
@@ -126,4 +163,5 @@ module.exports = {
   updateArticles,
   removeCommentById,
   fetchUsers,
+  selectValidTopic,
 };

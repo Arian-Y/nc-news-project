@@ -9,6 +9,7 @@ const {
   updateArticles,
   removeCommentById,
   fetchUsers,
+  selectValidTopic,
 } = require("../models/models");
 
 function getApi(req, res) {
@@ -33,10 +34,15 @@ function getArticlesById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
+  const { topic } = req.query;
   const { sortBy } = req.query;
   const { order } = req.query;
-  fetchArticles(sortBy, order)
-    .then((articles) => {
+  const articlePromise = [fetchArticles(sortBy, order, topic)];
+  if (topic) {
+    articlePromise.push(selectValidTopic(topic));
+  }
+  Promise.all(articlePromise)
+    .then(([articles]) => {
       res.status(200).send({ articles });
     })
     .catch(next);

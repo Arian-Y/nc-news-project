@@ -5,6 +5,7 @@ const request = require("supertest");
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js");
 const topics = require("../db/data/test-data/topics.js");
+
 require("jest-sorted");
 
 /* Set up your test imports here */
@@ -73,6 +74,25 @@ describe("GET /api/articles/:article_id", () => {
         });
       });
   });
+
+  test("200: responds with the correct article with comment-count when passed an article id", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.article_id).toBe(1);
+        expect(articles).toMatchObject({
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: 11,
+        });
+      });
+  });
 });
 
 describe("GET /api/articles", () => {
@@ -82,6 +102,7 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         articles.forEach((article) => {
+          console.log(articles, "<=== in the test");
           expect(article).toMatchObject({
             article_id: expect.any(Number),
             title: expect.any(String),
@@ -99,9 +120,11 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body }) => {
-        expect(body.articles).toBeSorted("created_at", {
-          decending: true,
+      .then(({ body: { articles } }) => {
+        console.log(articles);
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+          coerce: true,
         });
       });
   });
@@ -111,16 +134,21 @@ describe("GET /api/articles", () => {
       .get("/api/articles?")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles).toBeSorted("created_at");
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+          coerce: true,
+        });
       });
   });
 
-  test("200: return the object ordered by votes when passed votes as a parameter", () => {
+  test("200: return the object ordered by votes when passed votes as a parameter and ASC as a parameter", () => {
     return request(app)
-      .get("/api/articles?sortBy=votes")
+      .get("/api/articles?sortBy=votes&order=ASC")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles).toBeSorted("votes");
+        expect(articles).toBeSortedBy("votes", {
+          descending: false,
+        });
       });
   });
 
@@ -130,6 +158,50 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
+
+  test("200: return the object sorted by the topic that is inserted", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+          coerce: true,
+        });
+        expect(
+          articles.forEach((article) => {
+            expect(article.topic).toBe("mitch");
+          })
+        );
+      });
+  });
+
+  test("400: return bad request when passed a sortBy that doesnt exist", () => {
+    return request(app)
+      .get("/api/articles?sortBy=banana")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("400: return bad request when passed an order that doesnt exist", () => {
+    return request(app)
+      .get("/api/articles?order=up")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("404: return not found when passed a topic that doesnt exist", () => {
+    return request(app)
+      .get("/api/articles?topic=batman")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
       });
   });
 });
@@ -337,7 +409,6 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
-
 describe("GET /api/users", () => {
   test("200: responds with all users", () => {
     return request(app)
@@ -354,5 +425,3 @@ describe("GET /api/users", () => {
       });
   });
 });
-
-
