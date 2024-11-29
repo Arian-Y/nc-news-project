@@ -32,13 +32,13 @@ app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.get("/api/users", getAllUsers);
 
-app.all("*", (re, res, next) => {
+app.all("*", (req, res, next) => {
   res.status(404).send({ msg: "not found" });
   next();
 });
 
 app.use((err, req, res, next) => {
-  if (err.code === "22P02" || err.code === "23502") {
+  if (err.code === "22P02" || err.code === "23502" || err.code === "23503") {
     res.status(400).send({ msg: "Bad request" });
   }
   next(err);
