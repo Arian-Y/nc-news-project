@@ -24,7 +24,7 @@ https://nc-news-project-5i4v.onrender.com
 
 To get started, clone the repository by running the following command in your terminal:
 
-**git clone** https://github.com/imys1/imys-be-nc-news.git
+**git clone** https://github.com/Arian-Y/nc-news-project
 
 ### <ins>Install dependencies</ins>
 
