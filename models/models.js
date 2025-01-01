@@ -14,7 +14,7 @@ function fetchArticlesById(articleId) {
        articles.title,
         articles.author,
          articles.topic,
-          articles created_at,
+          articles.created_at,
           articles.body,
            articles.votes,
             articles.article_img_url,
