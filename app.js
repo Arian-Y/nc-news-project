@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 const {
   getApi,
   getTopics,
@@ -51,7 +51,6 @@ app.use((err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
   } else next(err);
-  s;
 });
 
 app.use((req, res) => {
