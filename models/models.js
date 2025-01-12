@@ -32,7 +32,6 @@ function fetchArticlesById(articleId) {
 }
 
 function fetchArticles(sortBy = "created_at", order = "DESC", topic) {
-  let queriedInfo = [];
   const acceptableSortBy = [
     "article_id",
     "title",
@@ -44,23 +43,31 @@ function fetchArticles(sortBy = "created_at", order = "DESC", topic) {
   ];
   const acceptableOrder = ["ASC", "DESC"];
 
-  if (!acceptableOrder.includes(order) || !acceptableSortBy.includes(sortBy)) {
+  if (!acceptableSortBy.includes(sortBy) || !acceptableOrder.includes(order)) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   }
 
-  let queryText = `SELECT
-  articles.article_id, articles.title, articles.author, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id `;
+  let queryText = `
+    SELECT articles.article_id, articles.title, articles.author, articles.topic, 
+           articles.created_at, articles.votes, articles.article_img_url, 
+           CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
+    FROM articles 
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+  `;
+
+  const queriedInfo = [];
 
   if (topic) {
     queryText += `WHERE topic = $1 `;
     queriedInfo.push(topic);
   }
-  if (sortBy) {
-    queryText += `GROUP BY articles.article_id ORDER BY articles.${sortBy} ${order}`;
-  }
-  return db.query(queryText, queriedInfo).then(({ rows }) => {
-    return rows;
-  });
+
+  queryText += `
+    GROUP BY articles.article_id 
+    ORDER BY ${sortBy} ${order};
+  `;
+
+  return db.query(queryText, queriedInfo).then(({ rows }) => rows);
 }
 
 function fetchComments(article_id) {
